@@ -31,6 +31,26 @@ Padrões e recursos:
 - Migrações Flyway garantem reprodutibilidade do schema.
 - Respostas HTTP adequadas (201 Created + Location em POST, 204 em DELETE, 400/409/502 conforme contexto).
 
+## 2.1 Diagramas
+
+- Diagrama de Arquitetura
+
+<p align="center">
+  <img width="1621" height="791" alt="DiagramaArquitetura" src="https://github.com/user-attachments/assets/c3cdd4b2-9c65-4d15-9176-586eb2917068" />
+</p>
+
+- Diagrama de Entidades
+
+<p align="center">
+  <img width="781" height="571" alt="DiagramaEntidade" src="https://github.com/user-attachments/assets/b8a993fb-296b-4992-8455-89ffe161ef1f" />
+</p>
+
+- Caso de Uso
+
+<p align="center">
+  <img width="1006" height="791" alt="CasodeUso" src="https://github.com/user-attachments/assets/116ff2a8-6190-48d8-8a77-3a2391a70981" />
+</p>
+
 ## 2.2 Estrutura de Pastas
 ```
 ApostaApoio/

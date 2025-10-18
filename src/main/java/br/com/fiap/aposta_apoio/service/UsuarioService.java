@@ -11,8 +11,17 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementação do serviço de usuários.
+ * Aplicação dos princípios SOLID:
+ * - SRP (Single Responsibility): responsável apenas pela lógica de negócio de usuários
+ * - OCP (Open/Closed): aberto para extensão via interface, fechado para modificação
+ * - LSP (Liskov Substitution): pode ser substituído por qualquer implementação de IUsuarioService
+ * - ISP (Interface Segregation): interface específica para operações de usuário
+ * - DIP (Dependency Inversion): depende de abstrações (UsuarioRepository, SessaoApoioRepository)
+ */
 @Service
-public class UsuarioService {
+public class UsuarioService implements IUsuarioService {
     private final UsuarioRepository repository;
     private final SessaoApoioRepository sessaoRepository;
 
@@ -21,6 +30,7 @@ public class UsuarioService {
         this.sessaoRepository = sessaoRepository;
     }
 
+    @Override
     public UsuarioDTO criar(UsuarioDTO dto) {
         Usuario usuario = new Usuario();
         usuario.setNome(dto.nome());
@@ -33,22 +43,26 @@ public class UsuarioService {
         return toDTO(salvo);
     }
 
+    @Override
     public List<UsuarioDTO> listar() {
         return repository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Page<UsuarioDTO> listarPaginado(Pageable pageable) {
         return repository.findAll(pageable).map(this::toDTO);
     }
 
+    @Override
     public UsuarioDTO buscarPorId(Long id) {
         Usuario usuario = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
         return toDTO(usuario);
     }
 
+    @Override
     public UsuarioDTO atualizar(Long id, UsuarioDTO dto) {
         Usuario usuario = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
@@ -62,7 +76,8 @@ public class UsuarioService {
         return toDTO(atualizado);
     }
 
-    public void remover(Long id) {
+    @Override
+    public void deletar(Long id) {
         Usuario usuario = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
         long qtd = sessaoRepository.countByUsuario_Id(id);

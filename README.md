@@ -94,10 +94,11 @@ ApostaApoio/
       db/migration/                            # Migrações Flyway
         V1__create_tables.sql
         V2__add_index_profissional_especialidade.sql
+        V3__add_auth_fields.sql
 ```
 
 ## 3. Tecnologias
-- Java 21
+- Java 17
 - Spring Boot (Web, Data JPA, Validation)
 - MySQL 8
 - Flyway
@@ -107,7 +108,7 @@ ApostaApoio/
 ## 4. Requisitos de Ambiente
 | Item | Versão Sugerida |
 |------|-----------------|
-| Java | 21 |
+| Java | 17 |
 | MySQL| 8.x |
 | Maven| 3.8+ |
 
@@ -123,14 +124,20 @@ spring.jpa.hibernate.ddl-auto=none
 spring.jpa.show-sql=true
 spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration
-server.port=8080
+server.port=8081
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# JWT
+# A chave é lida de variável de ambiente JWT_SECRET; se ausente, usa o default abaixo.
+api.security.token.secret=${JWT_SECRET:minha-chave-secreta-super-segura-para-jwt-2025}
+api.security.token.expiration=3600000
 ```
 
 ## 6. Migrações Flyway
 Arquivos em `src/main/resources/db/migration/`:
 - V1__create_tables.sql: Criação das tabelas base (usuario, profissional, sessao_apoio).
 - V2__add_index_profissional_especialidade.sql: Índice em profissional.especialidade.
+- V3__add_auth_fields.sql: Campos de autenticação (login, senha, role) para usuários.
 
 Para recriar do zero:
 ```
@@ -145,6 +152,38 @@ mvn clean install
 mvn spring-boot:run
 ```
 Ou pela IDE executando `ApostaApoioApplication`.
+
+### 7.1 Acesso à API (Swagger)
+- Swagger UI: http://localhost:8081/swagger-ui.html (ou http://localhost:8081/swagger-ui/index.html)
+- OpenAPI (JSON): http://localhost:8081/v3/api-docs
+
+### 7.2 Como rodar os testes
+- Todos os testes:
+```
+mvn test
+```
+- Teste específico:
+```
+mvn -Dtest=UsuarioServiceTest test
+```
+
+### 7.3 Autenticação (JWT)
+Fluxo:
+- Registrar: POST /auth/registro
+- Login: POST /auth/login → retorna token JWT
+- Usar o token nos endpoints protegidos via header:
+```
+Authorization: Bearer {seu_token_jwt}
+```
+Dica: defina a variável de ambiente JWT_SECRET em produção para substituir a chave default.
+
+### 7.4 Relatório de cobertura (JaCoCo)
+Gerar relatório:
+```
+mvn verify
+```
+Após concluir, abra:
+- target/site/jacoco/index.html
 
 ## 8. Endpoints Principais
 | Recurso | Método | Caminho | Descrição | Suporte Paginação |
@@ -279,13 +318,13 @@ Endpoint `/externo/tempo` consome `worldtimeapi.org`. Em caso de falha retorna f
 ## 12. Testes Rápidos (curl)
 Criar usuário:
 ```
-curl -i -X POST http://localhost:8080/usuarios -H "Content-Type: application/json" -d "{\"nome\":\"Joao Silva\",\"email\":\"joao.silva@example.com\",\"telefone\":\"11988887777\",\"cpf\":\"12345678901\",\"dataNascimento\":\"1990-05-10\",\"endereco\":{\"rua\":\"Rua das Flores\",\"numero\":\"123\",\"bairro\":\"Centro\",\"cidade\":\"Sao Paulo\",\"estado\":\"SP\",\"cep\":\"01001000\"}}"
+curl -i -X POST http://localhost:8081/usuarios -H "Content-Type: application/json" -d "{\"nome\":\"Joao Silva\",\"email\":\"joao.silva@example.com\",\"telefone\":\"11988887777\",\"cpf\":\"12345678901\",\"dataNascimento\":\"1990-05-10\",\"endereco\":{\"rua\":\"Rua das Flores\",\"numero\":\"123\",\"bairro\":\"Centro\",\"cidade\":\"Sao Paulo\",\"estado\":\"SP\",\"cep\":\"01001000\"}}"
 ```
 Listar usuários paginados:
 ```
-curl -s "http://localhost:8080/usuarios?page=0&size=5&sort=nome,asc"
+curl -s "http://localhost:8081/usuarios?page=0&size=5&sort=nome,asc"
 ```
 Consumir tempo externo:
 ```
-curl -s http://localhost:8080/externo/tempo
+curl -s http://localhost:8081/externo/tempo
 ```

@@ -15,8 +15,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Implementação do serviço de sessões de apoio.
+ * Aplicação dos princípios SOLID:
+ * - SRP: responsável apenas pela lógica de negócio de sessões
+ * - OCP: aberto para extensão via interface
+ * - DIP: depende de abstrações (repositories)
+ */
 @Service
-public class SessaoApoioService {
+public class SessaoApoioService implements ISessaoApoioService {
     private final SessaoApoioRepository repository;
     private final UsuarioRepository usuarioRepository;
     private final ProfissionalRepository profissionalRepository;
@@ -27,6 +34,7 @@ public class SessaoApoioService {
         this.profissionalRepository = profissionalRepository;
     }
 
+    @Override
     public SessaoApoioDTO criar(SessaoApoioDTO dto) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(dto.usuarioId());
         Optional<Profissional> profissionalOpt = profissionalRepository.findById(dto.profissionalId());
@@ -42,23 +50,27 @@ public class SessaoApoioService {
         return new SessaoApoioDTO(salvo.getId(), salvo.getUsuario().getId(), salvo.getProfissional().getId(), salvo.getDataHora(), salvo.getDescricao());
     }
 
+    @Override
     public List<SessaoApoioDTO> listar() {
         return repository.findAll().stream()
                 .map(s -> new SessaoApoioDTO(s.getId(), s.getUsuario().getId(), s.getProfissional().getId(), s.getDataHora(), s.getDescricao()))
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Page<SessaoApoioDTO> listarPaginado(Pageable pageable) {
         return repository.findAll(pageable)
                 .map(s -> new SessaoApoioDTO(s.getId(), s.getUsuario().getId(), s.getProfissional().getId(), s.getDataHora(), s.getDescricao()));
     }
 
+    @Override
     public SessaoApoioDTO buscarPorId(Long id) {
         SessaoApoio sessao = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Sessão de apoio não encontrada"));
         return new SessaoApoioDTO(sessao.getId(), sessao.getUsuario().getId(), sessao.getProfissional().getId(), sessao.getDataHora(), sessao.getDescricao());
     }
 
+    @Override
     public SessaoApoioDTO atualizar(Long id, SessaoApoioDTO dto) {
         SessaoApoio sessao = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Sessão de apoio não encontrada"));
@@ -74,7 +86,8 @@ public class SessaoApoioService {
         return new SessaoApoioDTO(atualizado.getId(), atualizado.getUsuario().getId(), atualizado.getProfissional().getId(), atualizado.getDataHora(), atualizado.getDescricao());
     }
 
-    public void remover(Long id) {
+    @Override
+    public void deletar(Long id) {
         SessaoApoio sessao = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Sessão de apoio não encontrada"));
         repository.delete(sessao);

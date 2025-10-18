@@ -13,16 +13,23 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import br.com.fiap.aposta_apoio.model.Especialidade;
+import org.springframework.security.core.AuthenticationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex) {
-        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> handleAuthentication(AuthenticationException ex) {
+        return build(HttpStatus.UNAUTHORIZED, "Credenciais inválidas", null);
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class, NoSuchElementException.class})
+    public ResponseEntity<?> handleNotFound(RuntimeException ex) {
+        return build(HttpStatus.NOT_FOUND, ex.getMessage(), null);
     }
 
     @ExceptionHandler(IllegalStateException.class)

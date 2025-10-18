@@ -10,14 +10,22 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementação do serviço de profissionais.
+ * Aplicação dos princípios SOLID:
+ * - SRP: responsável apenas pela lógica de negócio de profissionais
+ * - OCP: aberto para extensão via interface
+ * - DIP: depende de abstrações (ProfissionalRepository)
+ */
 @Service
-public class ProfissionalService {
+public class ProfissionalService implements IProfissionalService {
     private final ProfissionalRepository repository;
 
     public ProfissionalService(ProfissionalRepository repository) {
         this.repository = repository;
     }
 
+    @Override
     public ProfissionalDTO criar(ProfissionalDTO dto) {
         Profissional profissional = new Profissional();
         profissional.setNome(dto.nome());
@@ -28,22 +36,26 @@ public class ProfissionalService {
         return toDTO(salvo);
     }
 
+    @Override
     public List<ProfissionalDTO> listar() {
         return repository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Page<ProfissionalDTO> listarPaginado(Pageable pageable) {
         return repository.findAll(pageable).map(this::toDTO);
     }
 
+    @Override
     public ProfissionalDTO buscarPorId(Long id) {
         Profissional profissional = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado"));
         return toDTO(profissional);
     }
 
+    @Override
     public ProfissionalDTO atualizar(Long id, ProfissionalDTO dto) {
         Profissional profissional = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado"));
@@ -55,7 +67,8 @@ public class ProfissionalService {
         return toDTO(atualizado);
     }
 
-    public void remover(Long id) {
+    @Override
+    public void deletar(Long id) {
         Profissional profissional = repository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Profissional não encontrado"));
         repository.delete(profissional);

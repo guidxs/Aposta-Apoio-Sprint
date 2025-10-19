@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuração mínima do OpenAPI/Swagger.
+ * Configuração do OpenAPI/Swagger.
  */
 @Configuration
 public class SwaggerConfig {
